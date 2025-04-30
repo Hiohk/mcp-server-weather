@@ -60,9 +60,6 @@ WEATHER_API_KEY=your_weather_api_key
 ```bash
 # 启动主服务
 npm run start:prod
-
-# 启动天气服务（示例）
-node server/weather/weatherServer.js
 ```
 
 ## 接口示例
@@ -162,5 +159,3 @@ async function initializeServices() {
 2. **负载均衡支持**
 3. **服务监控仪表盘**
 4. **协议缓冲支持**
-
-[![MCP Protocol Documentation](https://img.shields.io/badge/docs-MCP%20Protocol-blue)](https://modelcontextprotocol.org/docs)
