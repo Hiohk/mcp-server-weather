@@ -1,13 +1,21 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import dotenv from 'dotenv';
 import express from 'express';
-import { parseToolCallFromMessage } from "../server/common/tool.js"
+import cors from 'cors';
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { parseToolCallFromMessage } from "../server/common/tool.js";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+// app.use(cors({
+//   origin: 'http://localhost:5173'
+// }));
+
+// 允许所有来源的请求
+app.use(cors());
 
 // 环境配置
 const ENV_CONFIG = {

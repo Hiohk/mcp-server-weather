@@ -1,46 +1,43 @@
 <template>
   <div class="chat-box">
-    <t-chat
-      ref="chatRef"
-      clear-history
-      :data="chatList"
-      :text-loading="loading"
-      :is-stream-load="isStreamLoad"
-      style="height: 600px"
-      @scroll="handleChatScroll"
-      @clear="clearConfirm"
-    >
+    <t-chat ref="chatRef" clear-history :data="chatList" :text-loading="loading" :is-stream-load="isStreamLoad"
+      style="height: 600px" @scroll="handleChatScroll" @clear="clearConfirm">
       <!-- eslint-disable vue/no-unused-vars -->
       <template #content="{ item, index }">
         <t-chat-reasoning v-if="item.reasoning?.length > 0" expand-icon-placement="right">
           <template #header>
             <t-chat-loading v-if="isStreamLoad" text="思考中..." indicator />
             <div v-else style="display: flex; align-items: center">
-              <CheckCircleIcon
-                style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px"
-              />
+              <CheckCircleIcon style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px" />
               <span>已深度思考</span>
             </div>
           </template>
-          <t-chat-content v-if="item.reasoning.length > 0" :content="item.reasoning" />
+          <t-chat-content v-if="item.reasoning.length > 0" :content="item.reasoning" variant="base" />
         </t-chat-reasoning>
-        <t-chat-content v-if="item.content.length > 0" :content="item.content" />
+        <t-chat-content v-if="item.content.length > 0" :content="item.content" variant="base" />
       </template>
       <template #actions="{ item, index }">
-        <t-chat-action
-          :content="item.content"
-          :operation-btn="['good', 'bad', 'replay', 'copy']"
-          @operation="handleOperation"
-        />
+        <t-chat-action :content="item.content" :operation-btn="['good', 'bad', 'replay', 'copy']"
+          @operation="handleOperation" />
       </template>
       <template #footer>
-        <t-chat-input
-          :autosize="{ minRows: 1, maxRows: 8 }"
-          :stop-disabled="isStreamLoad"
-          @send="inputEnter"
-          @stop="onStop"
-        >
-        </t-chat-input>
+        <t-chat-sender ref="chatSenderRef" class="chat-sender" :stop-disabled="loading" :textarea-props="{
+          placeholder: '请输入消息...',
+        }" @send="inputEnter" @stop="onStop">
+
+          <template #prefix>
+            <div class="model-select">
+              <t-tooltip v-model:visible="allowToolTip" content="切换模型" trigger="hover">
+                <t-select v-model="selectValue" :options="selectOptions" value-type="object"
+                  @focus="allowToolTip = false"></t-select>
+              </t-tooltip>
+              <t-button class="check-box" :class="{ 'is-active': isChecked }" variant="text" @click="checkClick">
+                <ToolsIcon />
+                <span>MCP 工具</span>
+              </t-button>
+            </div>
+          </template>
+        </t-chat-sender>
       </template>
     </t-chat>
     <t-button v-show="isShowToBottom" variant="text" class="bottomBtn" @click="backBottom">
@@ -56,6 +53,33 @@ import { MockSSEResponse } from './mock-data/sseRequest-reasoning'
 import { ArrowDownIcon, CheckCircleIcon } from 'tdesign-icons-vue-next'
 import { sendMessage } from '@/request/index.js'
 import { v4 as uuidv4 } from 'uuid'
+import dayjs from 'dayjs';
+
+import { ToolsIcon } from 'tdesign-icons-vue-next';
+const allowToolTip = ref(false);
+const chatSenderRef = ref(null);
+const selectOptions = [
+  {
+    label: '默认模型',
+    value: 'default',
+  },
+  {
+    label: 'THUDM/GLM-4-9B-0414',
+    value: 'THUDM/GLM-4-9B-0414',
+  },
+  {
+    label: 'DeepSeek-V3',
+    value: 'DeepSeek-V3',
+  },
+];
+const selectValue = ref({
+  label: '默认模型',
+  value: 'default',
+});
+const isChecked = ref(false);
+const checkClick = () => {
+  isChecked.value = !isChecked.value;
+};
 
 const fetchCancel = ref(null)
 const loading = ref(false)
@@ -92,7 +116,7 @@ const chatList = ref([
   {
     avatar: 'https://tdesign.gtimg.com/site/chat-avatar.png',
     name: 'Chat AI',
-    datetime: new Date().toDateString(),
+    datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
     reasoning: '',
     content: '✨ 您好！欢迎来到「Chat AI」的对话世界！ 你可以询问我天气信息✨',
     role: 'assistant',
@@ -100,8 +124,8 @@ const chatList = ref([
   },
   {
     avatar: 'https://tdesign.gtimg.com/site/avatar.jpg',
-    name: '自己',
-    datetime: new Date().toDateString(),
+    name: '用户',
+    datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
     content: '嗨！你好',
     role: 'user',
     reasoning: '',
@@ -123,8 +147,8 @@ const inputEnter = function (inputValue) {
   if (!inputValue) return
   const params = {
     avatar: 'https://tdesign.gtimg.com/site/avatar.jpg',
-    name: '自己',
-    datetime: new Date().toDateString(),
+    name: '用户',
+    datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
     content: inputValue,
     role: 'user',
   }
@@ -132,8 +156,8 @@ const inputEnter = function (inputValue) {
   // 空消息占位
   const params2 = {
     avatar: 'https://tdesign.gtimg.com/site/chat-avatar.png',
-    name: 'TDesignAI',
-    datetime: new Date().toDateString(),
+    name: 'Chat AI',
+    datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
     content: '',
     reasoning: '',
     role: 'assistant',
@@ -173,22 +197,29 @@ const handleData = async (chatString) => {
   loading.value = true
   isStreamLoad.value = true
   const lastItem = chatList.value[0]
-  const mockedData = {
-    reasoning: ``,
-    content: ``,
-  }
 
-  const response = await sendMessage({
+  const result = await sendMessage({
     message: chatString,
     sessionId: uuidv4(),
   })
 
-  console.log('----->', response)
+  console.log('----->', result);
+
+  chatList.value.shift();
+  chatList.value.unshift({
+    avatar: 'https://tdesign.gtimg.com/site/chat-avatar.png',
+    name: 'Chat AI',
+    datetime: dayjs(result.timestamp).format('YYYY-MM-DD HH:mm:ss'),
+    content: result.response.text,
+    reasoning: '',
+    role: 'assistant',
+  });
+
   // // 显示用时xx秒，业务侧需要自行处理
-  // lastItem.duration = 20
+  lastItem.duration = 20;
   // // 控制终止按钮
-  // isStreamLoad.value = false
-  // loading.value = false
+  isStreamLoad.value = false;
+  loading.value = false;
 }
 </script>
 <style lang="less">
@@ -196,12 +227,15 @@ const handleData = async (chatString) => {
 ::-webkit-scrollbar-thumb {
   background-color: var(--td-scrollbar-color);
 }
+
 ::-webkit-scrollbar-thumb:horizontal:hover {
   background-color: var(--td-scrollbar-hover-color);
 }
+
 ::-webkit-scrollbar-track {
   background-color: var(--td-scroll-track-color);
 }
+
 .chat-box {
   position: absolute;
   top: 50%;
@@ -210,6 +244,7 @@ const handleData = async (chatString) => {
   margin: 0 auto;
   max-width: 1280px;
   width: 80%;
+
   .bottomBtn {
     position: absolute;
     left: 50%;
@@ -225,6 +260,7 @@ const handleData = async (chatString) => {
       0px 16px 24px 2px rgba(0, 0, 0, 0.04),
       0px 6px 30px 5px rgba(0, 0, 0, 0.05);
   }
+
   .to-bottom {
     width: 40px;
     height: 40px;
@@ -237,6 +273,7 @@ const handleData = async (chatString) => {
     display: flex;
     align-items: center;
     justify-content: center;
+
     .t-icon {
       font-size: 24px;
     }
@@ -246,15 +283,18 @@ const handleData = async (chatString) => {
 .model-select {
   display: flex;
   align-items: center;
+
   .t-select {
     width: 112px;
     height: 32px;
     margin-right: 8px;
+
     .t-input {
       border-radius: 32px;
       padding: 0 15px;
     }
   }
+
   .check-box {
     width: 112px;
     height: 32px;
@@ -264,19 +304,87 @@ const handleData = async (chatString) => {
     color: rgba(0, 0, 0, 0.9);
     box-sizing: border-box;
     flex: 0 0 auto;
+
     .t-button__text {
       display: flex;
       align-items: center;
       justify-content: center;
+
       span {
         margin-left: 4px;
       }
     }
   }
+
   .check-box.is-active {
     border: 1px solid #d9e1ff;
     background: #f2f3ff;
     color: var(--td-brand-color);
+  }
+}
+
+.chat-sender {
+  .btn {
+    color: var(--td-text-color-disabled);
+    border: none;
+
+    &:hover {
+      color: var(--td-brand-color-hover);
+      border: none;
+      background: none;
+    }
+  }
+
+  .btn.t-button {
+    height: var(--td-comp-size-m);
+    padding: 0;
+  }
+
+  .model-select {
+    display: flex;
+    align-items: center;
+
+    .t-select {
+      width: 112px;
+      height: var(--td-comp-size-m);
+      margin-right: var(--td-comp-margin-s);
+
+      .t-input {
+        border-radius: 32px;
+        padding: 0 15px;
+      }
+
+      .t-input.t-is-focused {
+        box-shadow: none;
+      }
+    }
+
+    .check-box {
+      width: 112px;
+      height: var(--td-comp-size-m);
+      border-radius: 32px;
+      border: 0;
+      background: var(--td-bg-color-component);
+      color: var(--td-text-color-primary);
+      box-sizing: border-box;
+      flex: 0 0 auto;
+
+      .t-button__text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        span {
+          margin-left: var(--td-comp-margin-xs);
+        }
+      }
+    }
+
+    .check-box.is-active {
+      border: 1px solid var(--td-brand-color-focus);
+      background: var(--td-brand-color-light);
+      color: var(--td-text-color-brand);
+    }
   }
 }
 </style>

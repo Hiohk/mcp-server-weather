@@ -1,15 +1,11 @@
-// src/api/chatService.js
-import axios from 'axios';
-import dotenv from 'dotenv';
+import axios from 'axios'
 
-// dotenv.config();
-
-// const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+const baseURL = import.meta.env.BACKEND_BASE_URL || 'http://localhost:3000'
 // 创建 Axios 实例
 const instance = axios.create({
-  baseURL: 'http://localhost:3000',
-  timeout: 10000
-});
+  baseURL,
+  timeout: 10000,
+})
 
 /**
  * 发送聊天消息 (POST)
@@ -19,33 +15,32 @@ const instance = axios.create({
  */
 export async function sendMessage({ message, sessionId }) {
   try {
-    const response = await instance.post('/api/chat', {
+    const response = await instance.post('/chat', {
       message,
-      sessionId
-    });
+      sessionId,
+    })
 
-    return response.data;
+    return response.data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       // 处理Axios错误
-      const serverError = error.response?.data;
-      throw new Error(serverError?.message || error.message);
+      const serverError = error.response?.data
+      throw new Error(serverError?.message || error.message)
     }
-    throw error;
+    throw error
   }
 }
 
 // 请求拦截器
-instance.interceptors.request.use(config => {
-  console.log(`Sending request to ${config.url}`);
-  return config;
-});
+instance.interceptors.request.use((config) => {
+  return config
+})
 
 // 响应拦截器
 instance.interceptors.response.use(
-  response => response,
-  error => Promise.reject(error)
-);
+  (response) => response,
+  (error) => Promise.reject(error),
+)
 
 // 导出实例以便其他模块使用
-export default instance;
+export default instance
