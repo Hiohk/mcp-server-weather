@@ -1,37 +1,69 @@
 <template>
   <div class="chat-box">
-    <t-chat ref="chatRef" clear-history :data="chatList" :text-loading="loading" :is-stream-load="isStreamLoad"
-      style="height: 600px" @scroll="handleChatScroll" @clear="clearConfirm">
+    <t-chat
+      ref="chatRef"
+      clear-history
+      :data="chatList"
+      :text-loading="loading"
+      :is-stream-load="isStreamLoad"
+      style="height: 600px"
+      @scroll="handleChatScroll"
+      @clear="clearConfirm"
+    >
       <!-- eslint-disable vue/no-unused-vars -->
       <template #content="{ item, index }">
         <t-chat-reasoning v-if="item.reasoning?.length > 0" expand-icon-placement="right">
           <template #header>
             <t-chat-loading v-if="isStreamLoad" text="思考中..." indicator />
             <div v-else style="display: flex; align-items: center">
-              <CheckCircleIcon style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px" />
+              <CheckCircleIcon
+                style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px"
+              />
               <span>已深度思考</span>
             </div>
           </template>
-          <t-chat-content v-if="item.reasoning.length > 0" :content="item.reasoning" variant="base" />
+          <t-chat-content
+            v-if="item.reasoning.length > 0"
+            :content="item.reasoning"
+            variant="base"
+          />
         </t-chat-reasoning>
         <t-chat-content v-if="item.content.length > 0" :content="item.content" variant="base" />
       </template>
       <template #actions="{ item, index }">
-        <t-chat-action :content="item.content" :operation-btn="['good', 'bad', 'replay', 'copy']"
-          @operation="handleOperation" />
+        <t-chat-action
+          :content="item.content"
+          :operation-btn="['good', 'bad', 'replay', 'copy']"
+          @operation="handleOperation"
+        />
       </template>
       <template #footer>
-        <t-chat-sender ref="chatSenderRef" class="chat-sender" :stop-disabled="loading" :textarea-props="{
-          placeholder: '请输入消息...',
-        }" @send="inputEnter" @stop="onStop">
-
+        <t-chat-sender
+          ref="chatSenderRef"
+          class="chat-sender"
+          :stop-disabled="loading"
+          :textarea-props="{
+            placeholder: '请输入消息...',
+          }"
+          @send="inputEnter"
+          @stop="onStop"
+        >
           <template #prefix>
             <div class="model-select">
               <t-tooltip v-model:visible="allowToolTip" content="切换模型" trigger="hover">
-                <t-select v-model="selectValue" :options="selectOptions" value-type="object"
-                  @focus="allowToolTip = false"></t-select>
+                <t-select
+                  v-model="selectValue"
+                  :options="selectOptions"
+                  value-type="object"
+                  @focus="allowToolTip = false"
+                ></t-select>
               </t-tooltip>
-              <t-button class="check-box" :class="{ 'is-active': isChecked }" variant="text" @click="checkClick">
+              <t-button
+                class="check-box"
+                :class="{ 'is-active': isChecked }"
+                variant="text"
+                @click="checkClick"
+              >
                 <ToolsIcon />
                 <span>MCP 工具</span>
               </t-button>
@@ -49,15 +81,14 @@
 </template>
 <script setup lang="jsx">
 import { ref } from 'vue'
-import { MockSSEResponse } from './mock-data/sseRequest-reasoning'
 import { ArrowDownIcon, CheckCircleIcon } from 'tdesign-icons-vue-next'
 import { sendMessage } from '@/request/index.js'
 import { v4 as uuidv4 } from 'uuid'
-import dayjs from 'dayjs';
+import dayjs from 'dayjs'
 
-import { ToolsIcon } from 'tdesign-icons-vue-next';
-const allowToolTip = ref(false);
-const chatSenderRef = ref(null);
+import { ToolsIcon } from 'tdesign-icons-vue-next'
+const allowToolTip = ref(false)
+const chatSenderRef = ref(null)
 const selectOptions = [
   {
     label: '默认模型',
@@ -71,15 +102,15 @@ const selectOptions = [
     label: 'DeepSeek-V3',
     value: 'DeepSeek-V3',
   },
-];
+]
 const selectValue = ref({
   label: '默认模型',
   value: 'default',
-});
-const isChecked = ref(false);
+})
+const isChecked = ref(false)
 const checkClick = () => {
-  isChecked.value = !isChecked.value;
-};
+  isChecked.value = !isChecked.value
+}
 
 const fetchCancel = ref(null)
 const loading = ref(false)
@@ -200,26 +231,26 @@ const handleData = async (chatString) => {
 
   const result = await sendMessage({
     message: chatString,
-    sessionId: uuidv4(),
+    // sessionId: uuidv4(),
   })
 
-  console.log('----->', result);
+  console.log('----->', result)
 
-  chatList.value.shift();
+  chatList.value.shift()
   chatList.value.unshift({
     avatar: 'https://tdesign.gtimg.com/site/chat-avatar.png',
     name: 'Chat AI',
-    datetime: dayjs(result.timestamp).format('YYYY-MM-DD HH:mm:ss'),
-    content: result.response.text,
+    datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+    content: result.response.choices[0].message.content,
     reasoning: '',
     role: 'assistant',
-  });
+  })
 
-  // // 显示用时xx秒，业务侧需要自行处理
-  lastItem.duration = 20;
-  // // 控制终止按钮
-  isStreamLoad.value = false;
-  loading.value = false;
+  // 显示用时xx秒，业务侧需要自行处理
+  lastItem.duration = 20
+  // 控制终止按钮
+  isStreamLoad.value = false
+  loading.value = false
 }
 </script>
 <style lang="less">

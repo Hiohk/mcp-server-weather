@@ -1,0 +1,28 @@
+{
+  "name": "mcp-sse-server",
+  "version": "1.0.0",
+  "description": "mcp server服务端实现",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node src/mcp-sse-server.js",
+    "start": "node dist/mcp-sse-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "server",
+    "MCP Server",
+    "sse"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "zod": "^3.24.4"
+  }
+}

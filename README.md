@@ -1,6 +1,8 @@
 # MCP Service Framework
 
-一个基于MCP（Model Context Protocol）协议的可扩展服务框架，提供标准化的工具调用接口和AI集成能力。包含基础服务架构、天气服务实现示例和智能对话处理管道。
+一个基于MCP（Model Context Protocol）协议的可扩展服务框架，提供标准化的工具调用接口和AI集成能力。包含基础服务架构、天气服务实现示例和智能对话处理管道。前端效果如下图所示：
+
+![alt text](assets/home.png)
 
 ## 核心特性
 
