@@ -10,11 +10,13 @@ let availableTools = [];
 const app = express();
 
 // 允许所有来源的请求
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // 使用中间件
 app.use(express.json());
@@ -30,19 +32,21 @@ async function initMcpClient() {
       version: "1.0.0",
     });
 
-    const transport = new SSEClientTransport(new URL(process.env.SSE_SERVER_URL));
+    const transport = new SSEClientTransport(
+      new URL(process.env.SSE_SERVER_URL)
+    );
 
     await mcpClient.connect(transport);
     const { tools } = await mcpClient.listTools();
 
     // 转换工具格式为通用格式
-    availableTools = tools.map(tool => ({
+    availableTools = tools.map((tool) => ({
       type: "function",
       function: {
         name: tool.name,
         description: tool.description,
-        input_schema: tool.inputSchema
-      }
+        input_schema: tool.inputSchema,
+      },
     }));
 
     console.log("MCP客户端和工具已初始化完成");
@@ -88,10 +92,12 @@ apiRouter.post("/chat", async (req, res) => {
     // 调用通用大模型接口
     const completion = await processWithAI({
       messages: [{ role: "user", content: message }],
-      tools: availableTools
+      tools: availableTools,
     });
 
-    const response = completion.choices[0].message
+    const response = completion.choices[0].message;
+
+    console.log("response.tool_calls", response.tool_calls);
 
     // 处理工具调用
     if (response.tool_calls) {
@@ -101,19 +107,19 @@ apiRouter.post("/chat", async (req, res) => {
         try {
           const toolResult = await mcpClient.callTool({
             name: toolCall.function.name,
-            arguments: toolCall.function.arguments
+            arguments: JSON.parse(toolCall.function.arguments),
           });
 
           toolResults.push({
             id: toolCall.id,
             name: toolCall.function.name,
-            result: toolResult
+            result: toolResult,
           });
         } catch (error) {
           toolResults.push({
             id: toolCall.id,
             name: toolCall.function.name,
-            error: error.message
+            error: error.message,
           });
         }
       }
@@ -124,19 +130,19 @@ apiRouter.post("/chat", async (req, res) => {
           { role: "user", content: message },
           {
             role: "user",
-            content: JSON.stringify(toolResults)
-          }
-        ]
+            content: JSON.stringify(toolResults),
+          },
+        ],
       });
 
       res.json({
         response: finalResponse,
-        toolCalls: toolResults
+        toolCalls: toolResults,
       });
     } else {
       res.json({
         response: response.content,
-        toolCalls: []
+        toolCalls: [],
       });
     }
   } catch (error) {
@@ -155,7 +161,7 @@ apiRouter.post("/call-tool", async (req, res) => {
 
     const result = await mcpClient.callTool({
       name,
-      arguments: args || {}
+      arguments: args || {},
     });
 
     res.json({ result });

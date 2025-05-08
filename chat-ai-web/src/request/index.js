@@ -13,11 +13,10 @@ const instance = axios.create({
  * @param {string} [sessionId] 可选会话ID（支持多轮对话）
  * @returns {Promise<{id: string, content: string, timestamp: number, status: string}>}
  */
-export async function sendMessage({ message, sessionId }) {
+export async function sendMessage({ message }) {
   try {
     const response = await instance.post('/chat', {
       message,
-      sessionId,
     })
 
     return response.data
