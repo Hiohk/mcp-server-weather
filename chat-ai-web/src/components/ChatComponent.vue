@@ -70,6 +70,9 @@
             </div>
           </template>
         </t-chat-sender>
+        <div class="footer-info">
+          Copyright @ 2025-{{ new Date().getFullYear() }} HKGroup. All Rights Reserved
+        </div>
       </template>
     </t-chat>
     <t-button v-show="isShowToBottom" variant="text" class="bottomBtn" @click="backBottom">
@@ -85,8 +88,8 @@ import { ArrowDownIcon, CheckCircleIcon } from 'tdesign-icons-vue-next'
 import { sendMessage } from '@/request/index.js'
 import { v4 as uuidv4 } from 'uuid'
 import dayjs from 'dayjs'
-
 import { ToolsIcon } from 'tdesign-icons-vue-next'
+
 const allowToolTip = ref(false)
 const chatSenderRef = ref(null)
 const selectOptions = [
@@ -224,7 +227,6 @@ const fetchSSE = async (fetchFn, options) => {
   })
 }
 const handleData = async (chatString) => {
-  console.log('handleData', chatString)
   loading.value = true
   isStreamLoad.value = true
   const lastItem = chatList.value[0]
@@ -268,13 +270,11 @@ const handleData = async (chatString) => {
 }
 
 .chat-box {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0 auto;
+  position: relative;
+  margin: 0 20px;
   max-width: 1280px;
-  width: 80%;
+  background-color: #fff;
+  padding: 10px 30px;
 
   .bottomBtn {
     position: absolute;
@@ -417,5 +417,14 @@ const handleData = async (chatString) => {
       color: var(--td-text-color-brand);
     }
   }
+}
+
+.footer-info {
+  text-align: center;
+  font-size: var(--ds-font-size-s);
+  color: #9c9b9b;
+  margin: 6px 0;
+  line-height: 14px;
+  margin-bottom: 30px;
 }
 </style>

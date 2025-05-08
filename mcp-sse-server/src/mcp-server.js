@@ -1,12 +1,14 @@
+import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { getCityLocation, getCityWeather } from './services/weather.js';
-import { z } from "zod";
+
 
 export const server = new McpServer({
   name: "mcp-sse-server",
   version: "1.0.0",
-  description: "城市天气信息服务",
+  description: "A server for MCP SSE",
 });
+
 
 // 获取城市信息工具（带参数校验）
 server.tool(
@@ -21,9 +23,9 @@ server.tool(
     try {
       // 查询城市信息
       const result = await getCityLocation({ location, lang, number });
-       // 获取天气预报
+      // 获取天气预报
       const weatherData = await getCityWeather({ location: result.location[0].id, lang: "zh" });
-      
+
       // 构建实时天气数据
       const currentWeather = {
         observationTime: weatherData.now.obsTime,
