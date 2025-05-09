@@ -4,7 +4,7 @@ const baseURL = import.meta.env.BACKEND_BASE_URL || 'http://localhost:3000/api'
 // 创建 Axios 实例
 const instance = axios.create({
   baseURL,
-  timeout: 10000,
+  timeout: 60000,
 })
 
 /**

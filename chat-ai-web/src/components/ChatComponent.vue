@@ -1,36 +1,69 @@
 <template>
   <div class="chat-box">
-    <t-chat ref="chatRef" clear-history :data="chatList" :text-loading="loading" :is-stream-load="isStreamLoad"
-      style="height: 100%" @scroll="handleChatScroll" @clear="clearConfirm">
+    <t-chat
+      ref="chatRef"
+      clear-history
+      :data="chatList"
+      :text-loading="loading"
+      :is-stream-load="isStreamLoad"
+      style="height: 100%"
+      @scroll="handleChatScroll"
+      @clear="clearConfirm"
+    >
       <!-- eslint-disable vue/no-unused-vars -->
       <template #content="{ item, index }">
         <t-chat-reasoning v-if="item.reasoning?.length > 0" expand-icon-placement="right">
           <template #header>
             <t-chat-loading v-if="isStreamLoad" text="思考中..." indicator />
             <div v-else style="display: flex; align-items: center">
-              <CheckCircleIcon style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px" />
+              <CheckCircleIcon
+                style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px"
+              />
               <span>已深度思考</span>
             </div>
           </template>
-          <t-chat-content v-if="item.reasoning.length > 0" :content="item.reasoning" variant="base" />
+          <t-chat-content
+            v-if="item.reasoning.length > 0"
+            :content="item.reasoning"
+            variant="base"
+          />
         </t-chat-reasoning>
         <t-chat-content v-if="item.content.length > 0" :content="item.content" variant="base" />
       </template>
       <template #actions="{ item, index }">
-        <t-chat-action :content="item.content" :operation-btn="['good', 'bad', 'replay', 'copy']"
-          @operation="handleOperation" />
+        <t-chat-action
+          :content="item.content"
+          :operation-btn="['good', 'bad', 'replay', 'copy']"
+          @operation="handleOperation"
+        />
       </template>
       <template #footer>
-        <t-chat-sender ref="chatSenderRef" class="chat-sender" :stop-disabled="loading" :textarea-props="{
-          placeholder: '请输入消息...',
-        }" @send="inputEnter" @stop="onStop">
+        <t-chat-sender
+          ref="chatSenderRef"
+          class="chat-sender"
+          :stop-disabled="loading"
+          :textarea-props="{
+            placeholder: '请输入消息...',
+          }"
+          @send="inputEnter"
+          @stop="onStop"
+        >
           <template #prefix>
             <div class="model-select">
               <t-tooltip v-model:visible="allowToolTip" content="切换模型" trigger="hover">
-                <t-select v-model="selectValue" :options="selectOptions" value-type="object"
-                  @focus="allowToolTip = false"></t-select>
+                <t-select
+                  v-model="selectValue"
+                  :options="selectOptions"
+                  value-type="object"
+                  @focus="allowToolTip = false"
+                ></t-select>
               </t-tooltip>
-              <t-button class="check-box" :class="{ 'is-active': isChecked }" variant="text" @click="checkClick">
+              <t-button
+                class="check-box"
+                :class="{ 'is-active': isChecked }"
+                variant="text"
+                @click="checkClick"
+              >
                 <ToolsIcon />
                 <span>MCP 工具</span>
               </t-button>
@@ -50,12 +83,16 @@
   </div>
 </template>
 <script setup lang="jsx">
-import { ref } from 'vue'
+import { ref, getCurrentInstance } from 'vue'
 import { ArrowDownIcon, CheckCircleIcon } from 'tdesign-icons-vue-next'
 import { sendMessage } from '@/request/index.js'
 import { v4 as uuidv4 } from 'uuid'
 import dayjs from 'dayjs'
 import { ToolsIcon } from 'tdesign-icons-vue-next'
+
+const emit = defineEmits(['getToolResult'])
+
+const { proxy } = getCurrentInstance()
 
 const allowToolTip = ref(false)
 const chatSenderRef = ref(null)
@@ -145,7 +182,10 @@ const inputEnter = function (inputValue) {
   if (isStreamLoad.value) {
     return
   }
-  if (!inputValue) return
+  if (!inputValue || !inputValue.trim()) {
+    proxy.$message('warning', '请输入消息')
+    return
+  }
   const params = {
     avatar: 'https://tdesign.gtimg.com/site/avatar.jpg',
     name: '用户',
@@ -193,33 +233,75 @@ const fetchSSE = async (fetchFn, options) => {
     reader.read().then(processText)
   })
 }
+
 const handleData = async (chatString) => {
-  loading.value = true
-  isStreamLoad.value = true
-  const lastItem = chatList.value[0]
+  try {
+    loading.value = true
+    isStreamLoad.value = true
 
-  const result = await sendMessage({
-    message: chatString,
-    // sessionId: uuidv4(),
-  })
+    // 保存最后一条消息的引用
+    const lastItem = chatList.value[0]
 
-  console.log('----->', result)
+    // 记录请求开始时间
+    const startTime = Date.now()
 
-  chatList.value.shift()
-  chatList.value.unshift({
-    avatar: 'https://tdesign.gtimg.com/site/chat-avatar.png',
-    name: 'Chat AI',
-    datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
-    content: result.response.choices[0].message.content,
-    reasoning: '',
-    role: 'assistant',
-  })
+    try {
+      const result = await sendMessage({
+        message: chatString,
+        // sessionId: uuidv4(),
+      })
 
-  // 显示用时xx秒，业务侧需要自行处理
-  lastItem.duration = 20
-  // 控制终止按钮
-  isStreamLoad.value = false
-  loading.value = false
+      console.log('请求成功:', result)
+
+      if (!result || !result.response) {
+        throw new Error('Invalid response from server')
+      }
+
+      emit('getToolResult', result.toolCalls)
+
+      // 计算请求耗时（秒）
+      const endTime = Date.now()
+      const duration = Math.round((endTime - startTime) / 1000)
+
+      // 移除占位消息
+      chatList.value.shift()
+
+      // 添加AI回复（包含实际耗时）
+      chatList.value.unshift({
+        avatar: 'https://tdesign.gtimg.com/site/chat-avatar.png',
+        name: 'Chat AI',
+        datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+        content: result.response.choices?.[0]?.message?.content ?? result.response,
+        reasoning: '',
+        role: 'assistant',
+        duration: duration, // 使用实际计算的时间
+      })
+    } catch (error) {
+      console.error('请求失败:', error)
+
+      // 计算失败请求耗时
+      const endTime = Date.now()
+      const duration = Math.round((endTime - startTime) / 1000)
+
+      // 移除占位消息
+      chatList.value.shift()
+
+      // 添加错误提示消息（包含耗时）
+      chatList.value.unshift({
+        avatar: 'https://tdesign.gtimg.com/site/chat-avatar.png',
+        name: 'Chat AI',
+        datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+        content: '抱歉，请求处理失败，请稍后再试',
+        reasoning: '',
+        role: 'assistant',
+        duration: duration,
+      })
+    }
+  } finally {
+    // 无论成功失败，都重置加载状态
+    isStreamLoad.value = false
+    loading.value = false
+  }
 }
 </script>
 <style lang="less">

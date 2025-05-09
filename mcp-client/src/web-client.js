@@ -98,6 +98,7 @@ apiRouter.post("/chat", async (req, res) => {
     const response = completion.choices[0].message;
 
     console.log("response.tool_calls", response.tool_calls);
+    console.log("response", response);
 
     // 处理工具调用
     if (response.tool_calls) {
