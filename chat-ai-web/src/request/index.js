@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.BACKEND_BASE_URL || 'http://localhost:3000/api'
+const baseURL = import.meta.env.BACKEND_BASE_URL || '/api'
 // 创建 Axios 实例
 const instance = axios.create({
   baseURL,

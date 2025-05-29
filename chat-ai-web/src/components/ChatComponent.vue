@@ -96,6 +96,7 @@ const { proxy } = getCurrentInstance()
 
 const allowToolTip = ref(false)
 const chatSenderRef = ref(null)
+
 const selectOptions = [
   {
     label: '默认模型',
@@ -143,6 +144,19 @@ const clearConfirm = function () {
 }
 const handleOperation = function (type, options) {
   console.log('handleOperation', type, options)
+  switch (type) {
+    case 'good':
+      proxy.$message('success', '感谢您的好评！')
+      break
+    case 'bad':
+      proxy.$message('error', '抱歉未能满足您的期望！')
+      break
+    case 'replay':
+      console.log('replay', options)
+      break
+    default:
+      break
+  }
 }
 // 倒序渲染
 const chatList = ref([
