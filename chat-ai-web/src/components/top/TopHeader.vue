@@ -6,6 +6,7 @@
           <img width="40" class="logo" src="@/assets/logo.svg" alt="logo" />
         </template>
         <t-menu-item value="home"> 首页 </t-menu-item>
+        <t-menu-item value="tool"> 工具 </t-menu-item>
         <t-menu-item value="blog"> 博客 </t-menu-item>
         <t-menu-item value="about"> 关于 </t-menu-item>
         <template #operations>
@@ -27,6 +28,9 @@ const handleMenuChange = (value) => {
   switch (value) {
     case 'home':
       router.push({ name: 'home' })
+      break
+    case 'tool':
+      router.push({ name: 'tool' })
       break
     case 'blog':
       router.push({ name: 'blog' })
