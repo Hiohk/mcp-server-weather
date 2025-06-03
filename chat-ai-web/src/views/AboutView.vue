@@ -2,7 +2,7 @@
   <div class="about-container">
     <t-layout class="layout-container">
       <t-content class="scrollable-content">
-        <t-card class="about-card"> <!-- 添加自定义卡片类 -->
+        <t-card class="about-card">
           <img class="img-bg" :src="aboutPic" alt="暂无图片">
 
           <div class="section-intro">
@@ -37,6 +37,16 @@
               </div>
             </div>
           </div>
+          <t-divider />
+          <div>
+            <span class="status-title">网站运行状态：</span>
+            <t-link theme="success" hover="color" href="https://stats.uptimerobot.com/sjGdkhkSal" target="_blank">
+              <template #suffix-icon>
+                <jump-icon />
+              </template>
+              服务状态
+            </t-link>
+          </div>
         </t-card>
       </t-content>
     </t-layout>
@@ -45,6 +55,7 @@
 
 <script setup>
 import aboutPic from '@/assets/about_bg.jpeg'
+import { JumpIcon } from 'tdesign-icons-vue-next';
 </script>
 
 <style scoped>
@@ -59,14 +70,13 @@ import aboutPic from '@/assets/about_bg.jpeg'
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh;
 }
 
 .scrollable-content {
   display: flex;
   flex-direction: column;
   margin: 70px 20px 10px;
-  height: calc(100vh - 70px);
+  height: calc(100% - 70px);
 }
 
 .img-bg {
@@ -136,5 +146,9 @@ import aboutPic from '@/assets/about_bg.jpeg'
 
 .contact-icon {
   font-size: 20px;
+}
+
+.status-title {
+  color: #637189;
 }
 </style>

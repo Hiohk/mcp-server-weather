@@ -1,69 +1,36 @@
 <template>
   <div class="chat-box">
-    <t-chat
-      ref="chatRef"
-      clear-history
-      :data="chatList"
-      :text-loading="loading"
-      :is-stream-load="isStreamLoad"
-      style="height: 100%"
-      @scroll="handleChatScroll"
-      @clear="clearConfirm"
-    >
+    <t-chat ref="chatRef" clear-history :data="chatList" :text-loading="loading" :is-stream-load="isStreamLoad"
+      style="height: 100%" @scroll="handleChatScroll" @clear="clearConfirm">
       <!-- eslint-disable vue/no-unused-vars -->
       <template #content="{ item, index }">
         <t-chat-reasoning v-if="item.reasoning?.length > 0" expand-icon-placement="right">
           <template #header>
             <t-chat-loading v-if="isStreamLoad" text="思考中..." indicator />
             <div v-else style="display: flex; align-items: center">
-              <CheckCircleIcon
-                style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px"
-              />
+              <CheckCircleIcon style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px" />
               <span>已深度思考</span>
             </div>
           </template>
-          <t-chat-content
-            v-if="item.reasoning.length > 0"
-            :content="item.reasoning"
-            variant="base"
-          />
+          <t-chat-content v-if="item.reasoning.length > 0" :content="item.reasoning" variant="base" />
         </t-chat-reasoning>
         <t-chat-content v-if="item.content.length > 0" :content="item.content" variant="base" />
       </template>
       <template #actions="{ item, index }">
-        <t-chat-action
-          :content="item.content"
-          :operation-btn="['good', 'bad', 'replay', 'copy']"
-          @operation="handleOperation"
-        />
+        <t-chat-action :content="item.content" :operation-btn="['good', 'bad', 'replay', 'copy']"
+          @operation="handleOperation" />
       </template>
       <template #footer>
-        <t-chat-sender
-          ref="chatSenderRef"
-          class="chat-sender"
-          :stop-disabled="loading"
-          :textarea-props="{
-            placeholder: '请输入消息...',
-          }"
-          @send="inputEnter"
-          @stop="onStop"
-        >
+        <t-chat-sender ref="chatSenderRef" class="chat-sender" :stop-disabled="loading" :textarea-props="{
+          placeholder: '请输入消息...',
+        }" @send="inputEnter" @stop="onStop">
           <template #prefix>
             <div class="model-select">
               <t-tooltip v-model:visible="allowToolTip" content="切换模型" trigger="hover">
-                <t-select
-                  v-model="selectValue"
-                  :options="selectOptions"
-                  value-type="object"
-                  @focus="allowToolTip = false"
-                ></t-select>
+                <t-select v-model="selectValue" :options="selectOptions" value-type="object"
+                  @focus="allowToolTip = false"></t-select>
               </t-tooltip>
-              <t-button
-                class="check-box"
-                :class="{ 'is-active': isChecked }"
-                variant="text"
-                @click="checkClick"
-              >
+              <t-button class="check-box" :class="{ 'is-active': isChecked }" variant="text" @click="checkClick">
                 <ToolsIcon />
                 <span>MCP 工具</span>
               </t-button>
@@ -71,7 +38,7 @@
           </template>
         </t-chat-sender>
         <div class="footer-info">
-          Copyright @ 2025-{{ new Date().getFullYear() }} HKGroup. All Rights Reserved
+          Copyright © 2025-{{ new Date().getFullYear() }} HKGroup. All Rights Reserved.
         </div>
       </template>
     </t-chat>
