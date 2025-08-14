@@ -6,11 +6,11 @@ dotenv.config();
 export async function processWithAI({ messages, tools = [] }) {
   try {
     const response = await fetch(
-      `${process.env.DEEPSEEK_API_BASE_URL}${process.env.DEEPSEEK_API_ENDPOINT}`,
+      `${process.env.MODEL_API_BASE_URL}${process.env.MODEL_API_ENDPOINT}`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+          Authorization: `Bearer ${process.env.MODEL_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

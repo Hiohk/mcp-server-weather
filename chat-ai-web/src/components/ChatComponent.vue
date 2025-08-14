@@ -70,12 +70,8 @@ const selectOptions = [
     value: 'default',
   },
   {
-    label: 'THUDM/GLM-4-9B-0414',
-    value: 'THUDM/GLM-4-9B-0414',
-  },
-  {
-    label: 'DeepSeek-V3',
-    value: 'DeepSeek-V3',
+    label: 'THUDM/glm-4-9b-chat',
+    value: 'THUDM/glm-4-9b-chat',
   },
 ]
 const selectValue = ref({
@@ -128,7 +124,7 @@ const handleOperation = function (type, options) {
 // 倒序渲染
 const chatList = ref([
   {
-    content: `Qwen/QwQ-32B大模型提供支持</span>`,
+    content: `THUDM/glm-4-9b-chat大模型提供支持</span>`,
     role: 'model-change',
     reasoning: '',
   },
@@ -137,7 +133,7 @@ const chatList = ref([
     name: 'Chat AI',
     datetime: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss'),
     reasoning: '',
-    content: '✨ 您好！欢迎来到「Chat AI」的对话世界！ 你可以询问我天气信息✨',
+    content: '✨ 您好！欢迎来到「Chat AI」的对话世界！✨',
     role: 'assistant',
     duration: 10,
   },

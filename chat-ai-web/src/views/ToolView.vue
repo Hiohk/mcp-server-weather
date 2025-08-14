@@ -151,7 +151,8 @@ import { sendMessage } from '@/request/index.js'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { SystemSumIcon, ClearIcon, CopyIcon } from 'tdesign-icons-vue-next'
 import dayjs from 'dayjs'
-import ClipboardJS from 'clipboard';
+import ClipboardJS from 'clipboard'
+import { jsonrepair } from 'jsonrepair'
 
 const subtitle =
   '基于用户输入的文本，智能生成符合不同编程语言规范的英文命名，支持多种命名风格和用途场景。'
@@ -263,8 +264,7 @@ const onSubmit = async ({ validateResult, firstError }) => {
     headerText.value = `生成于${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
     loading.value = false;
     customBtnLoading.value = { ...customBtnLoading.value, loading: false }
-
-    namingResultData.value = JSON.parse(result.response.match(/```json\s*([\s\S]*?)\s*```/)?.[1] || '[]')
+    namingResultData.value = JSON.parse(fixJsonFormat(result.response));
   } else {
     showEmpty.value = true;
     console.log('Validate Errors: ', firstError, validateResult)
@@ -273,6 +273,19 @@ const onSubmit = async ({ validateResult, firstError }) => {
     customBtnLoading.value = { ...customBtnLoading.value, loading: false }
   }
 }
+
+// 修复格式错误的 JSON 字符串
+const fixJsonFormat = (str) => {
+  let repaired = "";
+  try {
+    repaired = jsonrepair(str)
+  } catch (err) {
+    repaired = "";
+  } finally {
+    return repaired;
+  }
+
+};
 
 const getFormatName = (example) => {
   return `${example.description}-${example.output}`
