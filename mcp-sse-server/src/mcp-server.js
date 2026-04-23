@@ -11,7 +11,7 @@ export const server = new McpServer({
 // 获取城市信息工具（带参数校验）
 server.tool(
   "get_city",
-  "根据名称查询城市地理位置信息",
+  "根据名称查询城市天气信息",
   {
     location: z.string().min(1, "城市名称不能为空"),
     lang: z.string().default("zh"),
